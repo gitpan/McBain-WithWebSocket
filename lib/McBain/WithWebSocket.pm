@@ -9,7 +9,7 @@ use Carp;
 use JSON;
 use Net::WebSocket::Server;
 
-our $VERSION = "1.000000";
+our $VERSION = "1.000001";
 $VERSION = eval $VERSION;
 
 my $json = JSON->new->convert_blessed;
@@ -27,7 +27,6 @@ McBain::WithWebSocket - Load a McBain API as a WebSocket server
 
 	BEGIN { $ENV{MCBAIN_WITH} = 'WithWebSocket'; }
 
-	use lib 'lib', 't/lib';
 	use warnings;
 	use strict;
 	use MyAPI;
@@ -43,14 +42,17 @@ C<McBain::WithWebSocket> turns your L<McBain> API into a L<WebSocket|https://en.
 server using L<Net::WebSocket::Server>.
 
 The created server will be a JSON-in JSON-out service. When a client sends a message to
-the server, it is expected to be a JSON string, which will serve as the payload. The results
-of the API will be formatted into JSON as well and sent back to the client.
+the server, it is expected to be a JSON string, which will be converted into a hash-ref
+and serve as the payload for the API. The payload must have a C<path> key, which holds
+the complete path of the route/method to invoke (for example, C<GET:/math/sum>). The
+results from the API will be formatted into JSON as well and sent back to the client.
 
 Note that if an API method does not return a hash-ref, this runner module will automatically
 turn it into a hash-ref to ensure that conversion into JSON will be possible. The created
 hash-ref will have one key - holding the method's name, with whatever was returned from the
 method as its value. For example, if method C<GET:/divide> in topic C</math> returns an
-integer (say 7), then the client will get the JSON C<{ "GET:/math/divide": 7 }>.
+integer (say 7), then the client will get the JSON C<{ "GET:/math/divide": 7 }>. To avoid this
+behavior, make sure your API's methods return hash-refs.
 
 =head2 EXAMPLE CLIENT
 
